@@ -14,6 +14,9 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
+        phone: '',
+        age: '',
+        gender: '',
     });
 
     const submit = (e: React.FormEvent) => {
@@ -82,6 +85,62 @@ export default function Register() {
                                     {errors.email && (
                                         <p className="text-sm text-red-500 dark:text-red-400">{errors.email}</p>
                                     )}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone">Phone (Optional)</Label>
+                                    <Input
+                                        id="phone"
+                                        name="phone"
+                                        type="tel"
+                                        autoComplete="tel"
+                                        value={data.phone}
+                                        onChange={(e) => setData('phone', e.target.value)}
+                                        className={errors.phone ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                                        disabled={processing}
+                                        placeholder="+1 (555) 000-0000"
+                                    />
+                                    {errors.phone && (
+                                        <p className="text-sm text-red-500 dark:text-red-400">{errors.phone}</p>
+                                    )}
+                                </div>
+
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="age">Age (Optional)</Label>
+                                        <Input
+                                            id="age"
+                                            name="age"
+                                            type="number"
+                                            min="0"
+                                            max="120"
+                                            value={data.age}
+                                            onChange={(e) => setData('age', e.target.value)}
+                                            className={errors.age ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                                            disabled={processing}
+                                            placeholder="30"
+                                        />
+                                        {errors.age && (
+                                            <p className="text-sm text-red-500 dark:text-red-400">{errors.age}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="gender">Gender (Optional)</Label>
+                                        <Input
+                                            id="gender"
+                                            name="gender"
+                                            type="text"
+                                            value={data.gender}
+                                            onChange={(e) => setData('gender', e.target.value)}
+                                            className={errors.gender ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                                            disabled={processing}
+                                            placeholder="Male/Female/Other"
+                                        />
+                                        {errors.gender && (
+                                            <p className="text-sm text-red-500 dark:text-red-400">{errors.gender}</p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="space-y-2">

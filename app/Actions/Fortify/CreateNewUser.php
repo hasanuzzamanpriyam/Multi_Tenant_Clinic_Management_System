@@ -32,12 +32,21 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'password' => $this->passwordRules(),
+            'phone' => ['nullable', 'string', 'max:20'],
+            'age' => ['nullable', 'integer', 'min:0', 'max:120'],
+            'gender' => ['nullable', 'string', 'max:20'],
         ])->validate();
 
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
+            'phone' => $input['phone'] ?? null,
+            'age' => $input['age'] ?? null,
+            'gender' => $input['gender'] ?? null,
+            'role' => 'patient', // Default role for public registration
+            'tenant_id' => null, // No tenant for public registration (super admin assigns later)
+            'is_active' => true,
         ]);
     }
 }
