@@ -86,10 +86,10 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->prefix('admin')->na
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified', 'role:clinic_admin'])->prefix('clinic-admin')->name('clinic-admin.')->group(function () {
-    // Approvals
+    // Approvals (Doctor Registrations)
     Route::get('approvals', [ClinicAdminApprovalController::class, 'index'])->name('approvals.index');
-    Route::post('approvals/{appointment}/approve', [ClinicAdminApprovalController::class, 'approve'])->name('approvals.approve');
-    Route::post('approvals/{appointment}/reject', [ClinicAdminApprovalController::class, 'reject'])->name('approvals.reject');
+    Route::post('approvals/{doctor}/approve', [ClinicAdminApprovalController::class, 'approve'])->name('approvals.approve');
+    Route::post('approvals/{doctor}/reject', [ClinicAdminApprovalController::class, 'reject'])->name('approvals.reject');
 
     // Doctors
     Route::resource('doctors', ClinicDoctorController::class);

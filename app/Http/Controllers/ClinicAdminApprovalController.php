@@ -2,71 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Appointment;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ClinicAdminApprovalController extends Controller
 {
     /**
-     * Display a listing of pending approvals for the clinic admin's tenant.
+     * Display a listing of pending doctor registrations for the clinic admin's tenant.
      */
     public function index(Request $request)
     {
         $user = $request->user();
 
-        $appointments = Appointment::with(['patient', 'doctor'])
-            ->where('tenant_id', $user->tenant_id)
-            ->where('status', 'pending')
+        $pendingDoctors = User::where('tenant_id', $user->tenant_id)
+            ->where('role', 'doctor')
+            ->where('is_active', false)
             ->latest()
             ->paginate(15);
 
         return Inertia::render('clinic-admin/approvals/index', [
-            'appointments' => $appointments,
+            'pendingDoctors' => $pendingDoctors,
         ]);
     }
 
     /**
-     * Approve the specified appointment.
+     * Approve the specified doctor registration.
      */
-    public function approve(Request $request, Appointment $appointment)
+    public function approve(Request $request, User $doctor)
     {
-        $this->authorizeTenant($appointment);
+        $this->authorizeTenant($doctor);
 
-        $appointment->update([
-            'status' => 'approved',
+        if ($doctor->role !== 'doctor') {
+            abort(403, 'User is not a doctor.');
+        }
+
+        $doctor->update([
+            'is_active' => true,
         ]);
 
-        return back()->with('success', 'Appointment approved successfully.');
+        return back()->with('success', 'Doctor approved successfully.');
     }
 
     /**
-     * Reject the specified appointment.
+     * Reject the specified doctor registration.
      */
-    public function reject(Request $request, Appointment $appointment)
+    public function reject(Request $request, User $doctor)
     {
-        $this->authorizeTenant($appointment);
+        $this->authorizeTenant($doctor);
 
-        $request->validate([
-            'rejection_reason' => 'required|string',
-        ]);
+        if ($doctor->role !== 'doctor') {
+            abort(403, 'User is not a doctor.');
+        }
 
-        $appointment->update([
-            'status' => 'cancelled',
-            'doctor_notes' => $request->rejection_reason,
-            'cancelled_at' => now(),
-        ]);
+        $doctor->delete();
 
-        return back()->with('success', 'Appointment rejected successfully.');
+        return back()->with('success', 'Doctor registration rejected and removed.');
     }
 
     /**
-     * Ensure the appointment belongs to the user's tenant.
+     * Ensure the doctor belongs to the user's tenant.
      */
-    private function authorizeTenant(Appointment $appointment): void
+    private function authorizeTenant(User $doctor): void
     {
         $user = request()->user();
-        if ($appointment->tenant_id !== $user->tenant_id) {
+        if ($doctor->tenant_id !== $user->tenant_id) {
             abort(403, 'Unauthorized.');
         }
     }
