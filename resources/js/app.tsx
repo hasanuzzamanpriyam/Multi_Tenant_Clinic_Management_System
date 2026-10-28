@@ -10,16 +10,28 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+// Make route helper globally available
+declare global {
+    var route: typeof route;
+    interface Window {
+        route: typeof route;
+        Ziggy: any;
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.route = route;
+    (globalThis as any).route = route;
+    if ((window as any).Ziggy) {
+        (route as any).defaults = (window as any).Ziggy.defaults;
+        (route as any).routes = (window as any).Ziggy.routes;
+    }
+}
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
-    setup({ el, App, props, plugin }) {
-        // Initialize Ziggy route helper with Laravel route data
-        if (typeof window !== 'undefined' && (window as any).Ziggy) {
-            route.defaults = (window as any).Ziggy.defaults;
-            route.routes = (window as any).Ziggy.routes;
-        }
-        
+    setup({ el, App, props }) {
         createRoot(el).render(<App {...props} />);
     },
     progress: {
@@ -31,13 +43,3 @@ InertiaProgress.init({
     color: '#4B5563',
     showSpinner: true,
 });
-
-// Make route helper globally available
-declare global {
-    interface Window {
-        route: typeof route;
-        Ziggy: any;
-    }
-}
-
-window.route = route;

@@ -17,6 +17,10 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+Route::get('/home', function () {
+    return redirect('/dashboard');
+})->name('home.alias');
+
 // Guest authentication routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', fn () => Inertia::render('auth/login'))->name('login');
@@ -53,6 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         auth()->logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
+
         return redirect('/login');
     })->name('logout');
 });
