@@ -41,6 +41,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the tenant (clinic) that the user belongs to.
+     * Alias for clinic() relationship.
+     */
+    public function tenant(): BelongsTo
+    {
+        return $this->clinic();
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
