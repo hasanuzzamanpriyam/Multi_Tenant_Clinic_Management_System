@@ -10,8 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar, Clock, Loader2, Filter } from 'lucide-react';
+import { Calendar, Clock, Loader2, Filter, Plus, Trash2, Pill } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface Prescription {
+    medicine_name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+    special_instructions: string;
+}
 
 interface Appointment {
     id: number;
@@ -23,6 +31,7 @@ interface Appointment {
     completed_at: string | null;
     cancelled_at: string | null;
     patient: { id: number; name: string; email: string; phone: string | null };
+    prescriptions?: Prescription[];
 }
 
 interface AppointmentsData {
@@ -46,7 +55,10 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
     const [isConfirming, setIsConfirming] = useState(false);
     const [confirmingId, setConfirmingId] = useState<number | null>(null);
 
-    const { data, setData, put, processing, errors, reset } = useForm({ doctor_notes: '' });
+    const { data, setData, put, processing, errors, reset } = useForm({
+        doctor_notes: '',
+        prescriptions: [] as Prescription[],
+    });
 
     const statusOptions = [
         { value: '', label: 'All Statuses' },
@@ -86,6 +98,8 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
     const handleComplete = (appointmentId: number) => {
         setSelectedAppointment({ id: appointmentId } as any);
         reset('doctor_notes');
+        reset('prescriptions');
+        setData('prescriptions', []);
         setShowNotesModal(true);
     };
 
@@ -93,12 +107,37 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
         e.preventDefault();
         if (!selectedAppointment) return;
         put(route('doctor.appointments.complete', selectedAppointment.id), {
-            data: { doctor_notes: data.doctor_notes },
+            data: {
+                doctor_notes: data.doctor_notes,
+                prescriptions: data.prescriptions,
+            },
             onSuccess: () => {
                 setShowNotesModal(false);
                 setSelectedAppointment(null);
             },
         });
+    };
+
+    const addPrescription = () => {
+        setData('prescriptions', [...data.prescriptions, {
+            medicine_name: '',
+            dosage: '',
+            frequency: '',
+            duration: '',
+            special_instructions: '',
+        }]);
+    };
+
+    const removePrescription = (index: number) => {
+        const updated = [...data.prescriptions];
+        updated.splice(index, 1);
+        setData('prescriptions', updated);
+    };
+
+    const updatePrescription = (index: number, field: keyof Prescription, value: string) => {
+        const updated = [...data.prescriptions];
+        updated[index] = { ...updated[index], [field]: value };
+        setData('prescriptions', updated);
     };
 
     const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
@@ -295,7 +334,7 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
                                                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542 7-4.477 0-8.268-2.943-9.542 7z" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542 7z" />
                                                                 </svg>
                                                             </Button>
                                                         </Link>
@@ -335,14 +374,14 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
 
                 {showNotesModal && selectedAppointment && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                        <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                Complete Appointment
-                            </h3>
-                            <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                Add any clinical notes for this visit before completing the appointment.
-                            </p>
-                            <div className="space-y-4">
+                        <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-h-[90vh] overflow-y-auto">
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Complete Appointment</h3>
+                                    <p className="text-gray-600 dark:text-gray-400">Add clinical notes and prescriptions for this visit.</p>
+                                </div>
+                            </div>
+                            <div className="space-y-6">
                                 <div>
                                     <Label htmlFor="doctor_notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Doctor Notes
@@ -353,11 +392,102 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
                                         onChange={(e) => setData('doctor_notes', e.target.value)}
                                         rows={4}
                                         className="mt-1 block w-full rounded-md border border-gray-200 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
-                                        placeholder="Enter clinical notes, diagnosis, prescriptions, follow-up instructions..."
+                                        placeholder="Enter clinical notes, diagnosis, follow-up instructions..."
                                     />
                                 </div>
+
+                                <div>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Prescriptions</Label>
+                                        <Button type="button" variant="outline" size="sm" onClick={addPrescription}>
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            Add Medicine
+                                        </Button>
+                                    </div>
+                                    {data.prescriptions.length === 0 ? (
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center border border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+                                            No medicines added yet. Click "Add Medicine" to prescribe.
+                                        </p>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {data.prescriptions.map((prescription, index) => (
+                                                <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                                                    <div className="flex items-start justify-between mb-4">
+                                                        <h4 className="font-medium text-gray-900 dark:text-white">Medicine #{index + 1}</h4>
+                                                        <Button type="button" variant="ghost" size="sm" className="text-red-600 hover:text-red-400" onClick={() => removePrescription(index)}>
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor={`medicine_name_${index}`}>Medicine Name</Label>
+                                                            <Input
+                                                                id={`medicine_name_${index}`}
+                                                                value={prescription.medicine_name}
+                                                                onChange={(e) => updatePrescription(index, 'medicine_name', e.target.value)}
+                                                                placeholder="e.g., Amoxicillin"
+                                                                required
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor={`dosage_${index}`}>Dosage</Label>
+                                                            <Input
+                                                                id={`dosage_${index}`}
+                                                                value={prescription.dosage}
+                                                                onChange={(e) => updatePrescription(index, 'dosage', e.target.value)}
+                                                                placeholder="e.g., 500mg"
+                                                                required
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor={`frequency_${index}`}>Frequency</Label>
+                                                            <Select value={prescription.frequency} onValueChange={(v) => updatePrescription(index, 'frequency', v)}>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select frequency" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="Once daily">Once daily</SelectItem>
+                                                                    <SelectItem value="Twice daily">Twice daily</SelectItem>
+                                                                    <SelectItem value="Three times daily">Three times daily</SelectItem>
+                                                                    <SelectItem value="Four times daily">Four times daily</SelectItem>
+                                                                    <SelectItem value="Every 6 hours">Every 6 hours</SelectItem>
+                                                                    <SelectItem value="Every 8 hours">Every 8 hours</SelectItem>
+                                                                    <SelectItem value="Every 12 hours">Every 12 hours</SelectItem>
+                                                                    <SelectItem value="As needed">As needed (PRN)</SelectItem>
+                                                                    <SelectItem value="Before meals">Before meals</SelectItem>
+                                                                    <SelectItem value="After meals">After meals</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor={`duration_${index}`}>Duration</Label>
+                                                            <Input
+                                                                id={`duration_${index}`}
+                                                                value={prescription.duration}
+                                                                onChange={(e) => updatePrescription(index, 'duration', e.target.value)}
+                                                                placeholder="e.g., 7 days"
+                                                                required
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-4">
+                                                        <Label htmlFor={`special_instructions_${index}`}>Special Instructions (Optional)</Label>
+                                                        <textarea
+                                                            id={`special_instructions_${index}`}
+                                                            value={prescription.special_instructions}
+                                                            onChange={(e) => updatePrescription(index, 'special_instructions', e.target.value)}
+                                                            rows={2}
+                                                            className="mt-1 block w-full rounded-md border border-gray-200 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-400"
+                                                            placeholder="e.g., Take with food, avoid dairy..."
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex justify-end gap-3 mt-6">
+                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <Button variant="outline" onClick={() => { setShowNotesModal(false); setSelectedAppointment(null); }} disabled={processing}>
                                     Cancel
                                 </Button>

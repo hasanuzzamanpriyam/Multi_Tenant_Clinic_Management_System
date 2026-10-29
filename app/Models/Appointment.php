@@ -66,4 +66,12 @@ class Appointment extends Model
     {
         return $this->belongsTo(Clinic::class, 'tenant_id');
     }
+
+    /**
+     * Get the prescriptions associated with the appointment.
+     */
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
+    }
 }

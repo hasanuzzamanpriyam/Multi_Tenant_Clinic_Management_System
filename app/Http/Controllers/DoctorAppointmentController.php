@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\Prescription;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -35,7 +36,7 @@ class DoctorAppointmentController extends Controller
     public function show(Request $request, Appointment $appointment)
     {
         $this->authorizeDoctor($appointment);
-        $appointment->load(['patient', 'doctor']);
+        $appointment->load(['patient', 'doctor', 'prescriptions']);
 
         return Inertia::render('doctor/appointments/show', [
             'appointment' => $appointment,
@@ -62,7 +63,7 @@ class DoctorAppointmentController extends Controller
     }
 
     /**
-     * Complete the specified appointment with notes.
+     * Complete the specified appointment with notes and prescriptions.
      */
     public function complete(Request $request, Appointment $appointment)
     {
@@ -74,6 +75,12 @@ class DoctorAppointmentController extends Controller
 
         $request->validate([
             'doctor_notes' => 'nullable|string',
+            'prescriptions' => 'nullable|array',
+            'prescriptions.*.medicine_name' => 'required_with:prescriptions|string|max:255',
+            'prescriptions.*.dosage' => 'required_with:prescriptions|string|max:255',
+            'prescriptions.*.frequency' => 'required_with:prescriptions|string|max:255',
+            'prescriptions.*.duration' => 'required_with:prescriptions|string|max:255',
+            'prescriptions.*.special_instructions' => 'nullable|string',
         ]);
 
         $appointment->update([
@@ -82,7 +89,22 @@ class DoctorAppointmentController extends Controller
             'completed_at' => now(),
         ]);
 
-        return back()->with('success', 'Appointment completed successfully.');
+        // Save prescriptions
+        if ($request->has('prescriptions') && is_array($request->prescriptions)) {
+            foreach ($request->prescriptions as $prescriptionData) {
+                Prescription::create([
+                    'tenant_id' => $appointment->tenant_id,
+                    'appointment_id' => $appointment->id,
+                    'medicine_name' => $prescriptionData['medicine_name'],
+                    'dosage' => $prescriptionData['dosage'],
+                    'frequency' => $prescriptionData['frequency'],
+                    'duration' => $prescriptionData['duration'],
+                    'special_instructions' => $prescriptionData['special_instructions'] ?? null,
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Appointment completed successfully with prescriptions.');
     }
 
     /**

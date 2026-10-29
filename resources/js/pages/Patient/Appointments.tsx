@@ -10,8 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar, Clock, Loader2, Filter, FileText } from 'lucide-react';
+import { Calendar, Clock, Loader2, Filter, FileText, Pill, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface Prescription {
+    id: number;
+    medicine_name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+    special_instructions: string | null;
+}
 
 interface Doctor {
     id: number;
@@ -29,6 +38,7 @@ interface Appointment {
     completed_at: string | null;
     cancelled_at: string | null;
     doctor: Doctor;
+    prescriptions?: Prescription[];
 }
 
 interface AppointmentsData {
@@ -55,6 +65,7 @@ const statusLabels = {
 
 export default function PatientAppointments({ appointments, filters }: { appointments: AppointmentsData; filters: { status: string } }) {
     const [statusFilter, setStatusFilter] = useState(filters.status || '');
+    const [expandedPrescriptions, setExpandedPrescriptions] = useState<Record<number, boolean>>({});
 
     const statusOptions = [
         { value: '', label: 'All Statuses' },
@@ -86,6 +97,13 @@ export default function PatientAppointments({ appointments, filters }: { appoint
 
     const getStatusClass = (status: string) => {
         return statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+    };
+
+    const togglePrescriptions = (appointmentId: number) => {
+        setExpandedPrescriptions(prev => ({
+            ...prev,
+            [appointmentId]: !prev[appointmentId],
+        }));
     };
 
     return (
@@ -229,6 +247,70 @@ export default function PatientAppointments({ appointments, filters }: { appoint
                                                                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{appointment.doctor_notes}</p>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Prescriptions for Completed Appointments */}
+                                                {appointment.status === 'completed' && appointment.prescriptions && appointment.prescriptions.length > 0 && (
+                                                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                <Pill className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                                                <h4 className="font-medium text-purple-800 dark:text-purple-200">Prescriptions</h4>
+                                                            </div>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => togglePrescriptions(appointment.id)}
+                                                                className="text-sm"
+                                                            >
+                                                                {expandedPrescriptions[appointment.id] ? (
+                                                                    <>
+                                                                        <ChevronUp className="h-4 w-4 mr-1" />
+                                                                        Hide
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <ChevronDown className="h-4 w-4 mr-1" />
+                                                                        View ({appointment.prescriptions.length})
+                                                                    </>
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                        {expandedPrescriptions[appointment.id] && (
+                                                            <div className="mt-4 space-y-3">
+                                                                {appointment.prescriptions.map((prescription, index) => (
+                                                                    <div key={prescription.id || index} className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                                                                                <Pill className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                                                            </div>
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <p className="font-medium text-gray-900 dark:text-white truncate">{prescription.medicine_name}</p>
+                                                                                <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                                                                    <span className="flex items-center gap-1">
+                                                                                        <span className="font-medium">Dosage:</span> {prescription.dosage}
+                                                                                    </span>
+                                                                                    <span className="flex items-center gap-1">
+                                                                                        <span className="font-medium">Frequency:</span> {prescription.frequency}
+                                                                                    </span>
+                                                                                    <span className="flex items-center gap-1">
+                                                                                        <span className="font-medium">Duration:</span> {prescription.duration}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        {prescription.special_instructions && (
+                                                                            <div className="mt-3 pt-3 border-t border-purple-200 dark:border-purple-800">
+                                                                                <p className="text-sm text-purple-700 dark:text-purple-300">
+                                                                                    <span className="font-medium">Special Instructions:</span> {prescription.special_instructions}
+                                                                                </p>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
 
