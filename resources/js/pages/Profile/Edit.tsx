@@ -12,8 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
   User,
-  Mail,
-  Phone,
   Lock,
   Key,
   Shield,
@@ -29,7 +27,6 @@ import {
   Trash2,
   Settings,
   Building2,
-  X,
 } from 'lucide-react';
 
 interface User {
@@ -100,8 +97,8 @@ export default function ProfileEdit({ user, canManageTwoFactor }: ProfilePagePro
                 const url = URL.createObjectURL(blob);
                 setQrCode(url);
             }
-        } catch (error) {
-            console.error('Failed to fetch QR code:', error);
+        } catch {
+            // Silently fail - QR code is optional
         }
     };
 
@@ -109,7 +106,6 @@ export default function ProfileEdit({ user, canManageTwoFactor }: ProfilePagePro
         e.preventDefault();
         profileForm.put(route('user-profile-information.update'), {
             onSuccess: () => {},
-            onError: (errors) => console.log('Profile update errors:', errors),
         });
     };
 
@@ -137,11 +133,9 @@ export default function ProfileEdit({ user, canManageTwoFactor }: ProfilePagePro
                 if (data.svg) {
                     setQrCode(`data:image/svg+xml;base64,${btoa(data.svg)}`);
                 }
-            } else {
-                console.error('Failed to enable 2FA');
             }
-        } catch (error) {
-            console.error('Failed to enable 2FA:', error);
+        } catch {
+            // Silently fail
         }
     };
 
@@ -159,11 +153,9 @@ export default function ProfileEdit({ user, canManageTwoFactor }: ProfilePagePro
 
             if (response.ok) {
                 window.location.reload();
-            } else {
-                console.error('Failed to confirm 2FA');
             }
-        } catch (error) {
-            console.error('Failed to confirm 2FA:', error);
+        } catch {
+            // Silently fail
         }
     };
 
@@ -184,11 +176,9 @@ export default function ProfileEdit({ user, canManageTwoFactor }: ProfilePagePro
 
             if (response.ok) {
                 window.location.reload();
-            } else {
-                console.error('Failed to disable 2FA');
             }
-        } catch (error) {
-            console.error('Failed to disable 2FA:', error);
+        } catch {
+            // Silently fail
         }
     };
 
@@ -206,11 +196,9 @@ export default function ProfileEdit({ user, canManageTwoFactor }: ProfilePagePro
                 const data = await response.json();
                 setRecoveryCodes(data.recovery_codes);
                 setShowRecoveryCodes(true);
-            } else {
-                console.error('Failed to regenerate recovery codes');
             }
-        } catch (error) {
-            console.error('Failed to regenerate recovery codes:', error);
+        } catch {
+            // Silently fail
         }
     };
 
