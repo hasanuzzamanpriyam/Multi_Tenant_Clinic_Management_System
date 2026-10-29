@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoctorAppointmentController;
 use App\Http\Controllers\DoctorAvailabilityController;
 use App\Http\Controllers\PatientAppointmentController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdminApprovalController;
 use App\Http\Controllers\SuperAdminClinicController;
 use App\Http\Controllers\SuperAdminUserController;
@@ -44,7 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profile
-    Route::get('/profile', fn () => Inertia::render('profile'))->name('profile');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
 
     // Two-factor authentication
     Route::get('/two-factor-authentication', fn () => Inertia::render('two-factor'))->name('two-factor');
