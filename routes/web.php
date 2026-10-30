@@ -111,8 +111,8 @@ Route::middleware(['auth', 'verified', 'role:doctor'])->prefix('doctor')->name('
     // Appointments
     Route::get('appointments', [DoctorAppointmentController::class, 'index'])->name('appointments.index');
     Route::get('appointments/{appointment}', [DoctorAppointmentController::class, 'show'])->name('appointments.show');
-    Route::post('appointments/{appointment}/confirm', [DoctorAppointmentController::class, 'confirm'])->name('appointments.confirm');
-    Route::post('appointments/{appointment}/complete', [DoctorAppointmentController::class, 'complete'])->name('appointments.complete');
+    Route::match(['post', 'put'], 'appointments/{appointment}/confirm', [DoctorAppointmentController::class, 'confirm'])->name('appointments.confirm');
+    Route::match(['post', 'put'], 'appointments/{appointment}/complete', [DoctorAppointmentController::class, 'complete'])->name('appointments.complete');
 });
 
 /*

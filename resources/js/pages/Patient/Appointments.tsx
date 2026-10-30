@@ -50,10 +50,10 @@ interface AppointmentsData {
 }
 
 const statusColors = {
-    pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-    approved: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    pending: 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
+    approved: 'bg-blue-50 text-[#0080FF] border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
+    completed: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800',
+    cancelled: 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800',
 };
 
 const statusLabels = {
@@ -116,8 +116,8 @@ export default function PatientAppointments({ appointments, filters }: { appoint
                         <p className="text-gray-500 dark:text-gray-400 mt-1">View and manage your appointment history</p>
                     </div>
                     <Link href={route('patient.appointments.create')}>
-                        <Button>
-                            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <Button className="bg-[#0080FF] hover:bg-[#0070E0] text-white font-bold gap-2 shadow-xs">
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
                             Book Appointment

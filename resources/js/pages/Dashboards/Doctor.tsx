@@ -116,10 +116,12 @@ export default function DoctorDashboard() {
             <FileText className="h-4 w-4 mr-2" />
             Print Schedule
           </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Availability
-          </Button>
+          <Link href={route('doctor.availability.index')}>
+            <Button size="sm" className="bg-[#0080FF] hover:bg-[#0070E0] text-white font-bold gap-1.5 shadow-xs">
+              <Plus className="h-4 w-4" />
+              Manage Availability
+            </Button>
+          </Link>
         </div>
       </div>
 

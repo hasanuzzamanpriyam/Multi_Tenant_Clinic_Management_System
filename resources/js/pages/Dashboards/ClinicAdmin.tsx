@@ -114,10 +114,12 @@ export default function ClinicAdminDashboard() {
               <Calendar className="h-4 w-4 mr-2" />
               Schedule
             </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Doctor
-            </Button>
+            <Link href="/clinic-admin/approvals">
+              <Button size="sm" className="bg-[#0080FF] hover:bg-[#0070E0] text-white font-bold gap-1.5 shadow-xs">
+                <ClipboardCheck className="h-4 w-4" />
+                Doctor Approvals
+              </Button>
+            </Link>
           </div>
         </div>
 

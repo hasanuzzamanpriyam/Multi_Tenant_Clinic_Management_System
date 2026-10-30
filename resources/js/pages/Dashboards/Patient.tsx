@@ -131,10 +131,12 @@ export default function PatientDashboard() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Patient Dashboard</h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your health and appointments</p>
           </div>
-          <Button size="lg" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            Book Appointment
-          </Button>
+          <Link href={route('patient.appointments.create')}>
+            <Button size="lg" className="w-full sm:w-auto bg-[#0080FF] hover:bg-[#0070E0] text-white font-bold gap-2 shadow-xs">
+              <Plus className="h-4 w-4" />
+              Book Appointment
+            </Button>
+          </Link>
         </div>
 
         {/* Stats Grid */}

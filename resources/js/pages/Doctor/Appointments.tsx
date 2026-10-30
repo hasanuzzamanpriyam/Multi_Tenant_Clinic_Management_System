@@ -55,7 +55,7 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
     const [isConfirming, setIsConfirming] = useState(false);
     const [confirmingId, setConfirmingId] = useState<number | null>(null);
 
-    const { data, setData, put, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         doctor_notes: '',
         prescriptions: [] as Prescription[],
     });
@@ -87,7 +87,7 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
     const handleConfirmAction = (e: React.FormEvent) => {
         e.preventDefault();
         if (!confirmingId) return;
-        put(route('doctor.appointments.confirm', confirmingId), {
+        post(route('doctor.appointments.confirm', confirmingId), {
             onSuccess: () => {
                 setIsConfirming(false);
                 setConfirmingId(null);
@@ -99,18 +99,17 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
         setSelectedAppointment({ id: appointmentId } as any);
         reset('doctor_notes');
         reset('prescriptions');
-        setData('prescriptions', []);
+        setData({
+            doctor_notes: '',
+            prescriptions: [],
+        });
         setShowNotesModal(true);
     };
 
     const handleCompleteAction = (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedAppointment) return;
-        put(route('doctor.appointments.complete', selectedAppointment.id), {
-            data: {
-                doctor_notes: data.doctor_notes,
-                prescriptions: data.prescriptions,
-            },
+        post(route('doctor.appointments.complete', selectedAppointment.id), {
             onSuccess: () => {
                 setShowNotesModal(false);
                 setSelectedAppointment(null);
@@ -491,8 +490,8 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
                                 <Button variant="outline" onClick={() => { setShowNotesModal(false); setSelectedAppointment(null); }} disabled={processing}>
                                     Cancel
                                 </Button>
-                                <Button variant="destructive" onClick={handleCompleteAction} disabled={processing}>
-                                    {processing ? 'Completing...' : 'Complete Appointment'}
+                                <Button onClick={handleCompleteAction} disabled={processing} className="bg-[#0080FF] hover:bg-[#0070E0] text-white font-bold">
+                                    {processing ? 'Saving & Completing...' : 'Save Notes & Complete Appointment'}
                                 </Button>
                             </div>
                         </div>

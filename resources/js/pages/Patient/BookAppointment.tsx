@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
-import { Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Calendar,
@@ -17,9 +15,10 @@ import {
   Stethoscope,
   ArrowRight,
   ArrowLeft,
-  CheckCircle,
+  CheckCircle2,
   AlertCircle,
-  ChevronRight,
+  Sparkles,
+  Info,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -37,79 +36,47 @@ interface Doctor {
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-interface StepProps {
-    currentStep: number;
-    totalSteps: number;
-    onNext: () => void;
-    onBack: () => void;
-    canProceed: boolean;
-    nextLabel?: string;
-}
-
 function StepIndicator({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
     return (
-        <div className="flex items-center justify-between mb-8">
-            {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
-                <div key={step} className="flex items-center">
-                    <div className={cn(
-                        'flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-colors',
-                        step < currentStep
-                            ? 'bg-green-500 text-white'
-                            : step === currentStep
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
-                    )}>
-                        {step < currentStep ? <CheckCircle className="h-5 w-5" /> : step}
-                    </div>
-                    {step < totalSteps && (
-                        <div className={cn(
-                            'flex-1 h-1 mx-2',
-                            step < currentStep ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
-                        )} />
-                    )}
-                </div>
-            ))}
-        </div>
-    );
-}
+        <div className="flex items-center justify-between mb-8 max-w-xl mx-auto">
+            {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => {
+                const isCompleted = step < currentStep;
+                const isCurrent = step === currentStep;
 
-function StepNavigation({ currentStep, totalSteps, onNext, onBack, canProceed, nextLabel = 'Continue' }: StepProps) {
-    return (
-        <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-            <Button
-                variant="outline"
-                onClick={onBack}
-                disabled={currentStep === 1}
-                className="hidden sm:block"
-            >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-            </Button>
-            <div className="flex items-center gap-3 sm:ml-auto">
-                <Button
-                    variant="outline"
-                    onClick={onBack}
-                    disabled={currentStep === 1}
-                    className="sm:hidden"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                    onClick={onNext}
-                    disabled={!canProceed}
-                    className="sm:hidden"
-                >
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-                <Button
-                    onClick={onNext}
-                    disabled={!canProceed}
-                    className="hidden sm:block"
-                >
-                    {nextLabel}
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-            </div>
+                return (
+                    <div key={step} className="flex items-center flex-1 last:flex-none">
+                        <div className="flex items-center gap-2">
+                            <div
+                                className={cn(
+                                    'flex items-center justify-center w-9 h-9 rounded-full text-xs font-bold transition-all shadow-xs',
+                                    isCompleted
+                                        ? 'bg-emerald-600 text-white'
+                                        : isCurrent
+                                        ? 'bg-[#0080FF] text-white ring-4 ring-blue-100 dark:ring-blue-950/60 shadow-md'
+                                        : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
+                                )}
+                            >
+                                {isCompleted ? <CheckCircle2 className="h-4.5 w-4.5" /> : step}
+                            </div>
+                            <span className={cn(
+                                'text-xs font-semibold hidden sm:inline',
+                                isCurrent ? 'text-slate-900 dark:text-white' : 'text-slate-400'
+                            )}>
+                                {step === 1 ? 'Doctor' : step === 2 ? 'Schedule' : 'Confirm'}
+                            </span>
+                        </div>
+
+                        {step < totalSteps && (
+                            <div
+                                className={cn(
+                                    'flex-1 h-0.5 mx-3 rounded-full',
+                                    step < currentStep ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'
+                                )}
+                            />
+                        )}
+                    </div>
+                );
+            })}
         </div>
     );
 }
@@ -137,78 +104,86 @@ export default function BookAppointment({ doctors }: { doctors: Doctor[] }) {
         setAvailableSlots([]);
     };
 
-    // Step 2: Select Date & Time
+    // Step 2: Calculate Slots with Timezone-Safe Parsing
     useEffect(() => {
         if (selectedDate && data.doctor_id) {
-            const doctor = doctors.find(d => d.id === parseInt(data.doctor_id));
+            const doctor = doctors.find((d) => d.id === parseInt(data.doctor_id));
             if (!doctor) return;
 
-            const dayOfWeek = new Date(selectedDate).getDay();
+            const [year, month, day] = selectedDate.split('-').map(Number);
+            const dateObj = new Date(year, month - 1, day);
+            const dayOfWeek = dateObj.getDay();
+
             const dayAvailabilities = doctor.availabilities.filter(
-                a => a.day_of_week === new Date(selectedDate).getDay() && a.is_available
+                (a) => a.day_of_week === dayOfWeek && a.is_available
             );
 
             const slots: string[] = [];
-            dayAvailabilities.forEach(avail => {
+            dayAvailabilities.forEach((avail) => {
                 const start = avail.start_time.slice(0, 5);
                 const end = avail.end_time.slice(0, 5);
                 let current = start;
+
                 while (current < end) {
                     slots.push(current);
                     const [hours, minutes] = current.split(':').map(Number);
-                    let nextMinutes = minutes + 30;
-                    let nextHours = hours;
-                    if (nextMinutes >= 60) {
-                        nextHours += 1;
-                        nextMinutes -= 60;
-                    }
-                    current = `${nextHours.toString().padStart(2, '0')}:${nextMinutes.toString().padStart(2, '0')}`;
-                    if (current >= end) break;
+                    const nextMinutes = minutes + 30;
+                    const nextHours = hours + Math.floor(nextMinutes / 60);
+                    current = `${String(nextHours).padStart(2, '0')}:${String(nextMinutes % 60).padStart(2, '0')}`;
                 }
             });
+
             setAvailableSlots(slots);
-            setSelectedTime('');
+        } else {
+            setAvailableSlots([]);
         }
-    }, [selectedDate, data.doctor_id]);
+    }, [selectedDate, data.doctor_id, doctors]);
+
+    const handleSlotSelect = (slot: string) => {
+        setSelectedTime(slot);
+        setData('appointment_time', slot);
+    };
+
+    const handleDateChange = (date: string) => {
+        setSelectedDate(date);
+        setData('appointment_date', date);
+        setSelectedTime('');
+        setData('appointment_time', '');
+    };
 
     const canProceed = () => {
-        switch (currentStep) {
-            case 1:
-                return !!data.doctor_id;
-            case 2:
-                return !!selectedDate && !!selectedTime;
-            case 3:
-                return true;
-            default:
-                return false;
-        }
+        if (currentStep === 1) return !!data.doctor_id;
+        if (currentStep === 2) return !!selectedDate && !!selectedTime;
+        return true;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post(route('patient.appointments.store'), {
-            onSuccess: () => {
-                setData('doctor_id', '');
-                setData('appointment_date', '');
-                setData('appointment_time', '');
-                setData('patient_notes', '');
-                setCurrentStep(1);
-                setSelectedDate('');
-                setSelectedTime('');
-            },
-        });
+    const handleSubmit = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        post(route('patient.appointments.store'));
     };
 
-    const doctor = doctors.find(d => d.id === parseInt(data.doctor_id));
+    const selectedDoctor = doctors.find((d) => d.id === parseInt(data.doctor_id));
 
     return (
         <>
-            <Head title="Book Appointment" />
+            <Head title="Book Appointment — ClinicPro" />
+
             <div className="max-w-3xl mx-auto space-y-6">
                 {/* Header */}
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Book Appointment</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Schedule your appointment in 3 easy steps</p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                            Book an Appointment
+                        </h1>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                            Select a specialist doctor and pick an available time slot
+                        </p>
+                    </div>
+                    <Link href={route('patient.appointments.index')}>
+                        <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                            <ArrowLeft className="h-4 w-4" /> Cancel Booking
+                        </Button>
+                    </Link>
                 </div>
 
                 {/* Step Indicator */}
@@ -216,222 +191,236 @@ export default function BookAppointment({ doctors }: { doctors: Doctor[] }) {
 
                 {/* Step 1: Select Doctor */}
                 {currentStep === 1 && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Step 1: Select Doctor</CardTitle>
-                            <CardDescription>Choose a doctor from your clinic</CardDescription>
+                    <Card className="border border-slate-200/90 dark:border-slate-800">
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-lg font-bold">Select a Doctor</CardTitle>
+                            <CardDescription className="text-xs">
+                                Choose an attending healthcare professional at your clinic
+                            </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                {doctors.map((doc) => (
-                                    <Button
-                                        key={doc.id}
-                                        variant={data.doctor_id === doc.id.toString() ? 'default' : 'outline'}
-                                        className={cn(
-                                            'w-full h-32 flex flex-col items-start justify-center gap-2 text-left',
-                                            data.doctor_id === doc.id.toString()
-                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                                : 'border-gray-200 dark:border-gray-700 hover:border-blue-500'
-                                        )}
-                                        onClick={() => handleDoctorSelect(doc.id.toString())}
-                                    >
-                                        <div className="flex items-center gap-3 w-full">
-                                            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                                                <Stethoscope className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                            {doctors.length === 0 ? (
+                                <div className="text-center py-10 border border-dashed rounded-xl text-slate-400">
+                                    <Stethoscope className="h-10 w-10 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+                                    <p className="text-sm font-medium">No doctors currently available at this clinic.</p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-3.5 sm:grid-cols-2">
+                                    {doctors.map((doc) => {
+                                        const isSelected = data.doctor_id === doc.id.toString();
+
+                                        return (
+                                            <div
+                                                key={doc.id}
+                                                onClick={() => handleDoctorSelect(doc.id.toString())}
+                                                className={cn(
+                                                    'p-4 rounded-xl border text-left cursor-pointer transition-all duration-150 relative flex items-start gap-3.5',
+                                                    isSelected
+                                                        ? 'border-[#0080FF] bg-[#EAF4FF]/50 dark:bg-blue-950/30 ring-2 ring-[#0080FF]/30 shadow-xs'
+                                                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs'
+                                                )}
+                                            >
+                                                <div className={cn(
+                                                    'w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors',
+                                                    isSelected
+                                                        ? 'bg-[#0080FF] text-white shadow-xs'
+                                                        : 'bg-blue-50 dark:bg-blue-950/40 text-[#0080FF]'
+                                                )}>
+                                                    <Stethoscope className="h-5 w-5" />
+                                                </div>
+
+                                                <div className="flex-1 min-w-0 pr-6">
+                                                    <h3 className="font-bold text-slate-900 dark:text-white truncate text-sm">
+                                                        {doc.name}
+                                                    </h3>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                                                        {doc.specialty || 'General Practice'}
+                                                    </p>
+                                                    <div className="flex items-center gap-1.5 mt-2 text-[11px] text-[#0080FF] font-medium">
+                                                        <span>{doc.availabilities.length} weekly shifts</span>
+                                                    </div>
+                                                </div>
+
+                                                {isSelected && (
+                                                    <CheckCircle2 className="h-5 w-5 text-[#0080FF] absolute top-4 right-4" />
+                                                )}
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-gray-900 dark:text-white">{doc.name}</p>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">{doc.specialty || 'General Practice'}</p>
-                                            </div>
-                                        </div>
-                                        {data.doctor_id === doc.id.toString() && (
-                                            <CheckCircle className="h-5 w-5 text-blue-500" />
-                                        )}
-                                    </Button>
-                                ))}
-                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 )}
 
                 {/* Step 2: Select Date & Time */}
                 {currentStep === 2 && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Step 2: Select Date & Time</CardTitle>
-                            <CardDescription>Choose an available time slot with {doctor?.name}</CardDescription>
+                    <Card className="border border-slate-200/90 dark:border-slate-800">
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-lg font-bold">Pick Date & Time</CardTitle>
+                            <CardDescription className="text-xs">
+                                Consultation with <span className="font-semibold text-slate-800 dark:text-slate-200">{selectedDoctor?.name}</span>
+                            </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="appointment_date">Appointment Date</Label>
-                                        <Input
-                                            id="appointment_date"
-                                            type="date"
-                                            value={selectedDate}
-                                            onChange={(e) => setSelectedDate(e.target.value)}
-                                            min={new Date().toISOString().split('T')[0]}
-                                            className={errors.appointment_date ? 'border-red-500 focus-visible:ring-red-500' : ''}
-                                            disabled={processing}
-                                            required
-                                        />
-                                        {errors.appointment_date && (
-                                            <p className="text-sm text-red-500 dark:text-red-400">{errors.appointment_date}</p>
-                                        )}
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="appointment_time">Appointment Time</Label>
-                                        <Select
-                                            value={selectedTime}
-                                            onValueChange={setSelectedTime}
-                                            disabled={!selectedDate || availableSlots.length === 0 || processing}
-                                        >
-                                            <SelectTrigger className={cn(
-                                                availableSlots.length === 0 && 'bg-gray-50 dark:bg-gray-800',
-                                                errors.appointment_time && 'border-red-500 focus-visible:ring-red-500'
-                                            )}>
-                                                <SelectValue placeholder={availableSlots.length === 0
-                                                    ? 'Select a date first'
-                                                    : 'Select time'} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {availableSlots.length === 0 ? (
-                                                    <SelectItem value="" disabled>
-                                                        No available slots for this date
-                                                    </SelectItem>
-                                                ) : (
-                                                    availableSlots.map((slot) => {
-                                                        return (
-                                                            <SelectItem key={slot} value={slot}>
-                                                                {slot}
-                                                            </SelectItem>
-                                                        );
-                                                    })
-                                                )}
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.appointment_time && (
-                                            <p className="text-sm text-red-500 dark:text-red-400">{errors.appointment_time}</p>
-                                        )}
-                                        {availableSlots.length === 0 && selectedDate && (
-                                            <p className="text-sm text-amber-600 dark:text-amber-400">
-                                                <AlertCircle className="h-4 w-4 inline mr-1" />
-                                                No available slots for this date. Please choose another date.
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                                        <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                            <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                                            Selected Appointment
-                                        </h4>
-                                        {selectedDate && selectedTime ? (
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex items-center gap-2">
-                                                    <Calendar className="h-5 w-5 text-gray-500" />
-                                                    <span className="text-gray-900 dark:text-white">{new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="h-5 w-5 text-gray-500" />
-                                                    <span className="text-gray-900 dark:text-white font-medium">{selectedTime}</span>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <p className="text-gray-500 dark:text-gray-400">Select a date and time to see your appointment details</p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Step 3: Confirm & Notes */}
-                {currentStep === 3 && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Step 3: Confirm & Notes</CardTitle>
-                            <CardDescription>Review your appointment and add any notes</CardDescription>
-                        </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
-                                    <CheckCircle className="h-5 w-5" />
-                                    Appointment Summary
-                                </h4>
-                                <dl className="grid gap-3 sm:grid-cols-2 text-sm">
-                                    <div>
-                                        <dt className="text-gray-500 dark:text-gray-400">Doctor</dt>
-                                        <dd className="font-medium text-gray-900 dark:text-white">{doctor?.name}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-gray-500 dark:text-gray-400">Specialty</dt>
-                                        <dd className="font-medium text-gray-900 dark:text-white">{doctor?.specialty || 'General Practice'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-gray-500 dark:text-gray-400">Date</dt>
-                                        <dd className="font-medium text-gray-900 dark:text-white">{new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-gray-500 dark:text-gray-400">Time</dt>
-                                        <dd className="font-medium text-gray-900 dark:text-white">{selectedTime}</dd>
-                                    </div>
-                                </dl>
-                            </div>
-
-                            <div className="space-y-4">
+                            <div className="grid gap-6 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="patient_notes">Notes (Optional)</Label>
-                                    <Textarea
-                                        id="patient_notes"
-                                        value={data.patient_notes}
-                                        onChange={(e) => setData('patient_notes', e.target.value)}
-                                        placeholder="Any symptoms, concerns, or information for the doctor..."
-                                        rows={4}
-                                        className="resize-none"
+                                    <Label htmlFor="appointment_date" className="text-xs font-semibold">
+                                        Appointment Date
+                                    </Label>
+                                    <Input
+                                        id="appointment_date"
+                                        type="date"
+                                        value={selectedDate}
+                                        onChange={(e) => handleDateChange(e.target.value)}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        className={cn(
+                                            'focus-visible:ring-[#0080FF]',
+                                            errors.appointment_date && 'border-rose-500'
+                                        )}
+                                        disabled={processing}
+                                        required
                                     />
+                                    {errors.appointment_date && (
+                                        <p className="text-xs text-rose-500">{errors.appointment_date}</p>
+                                    )}
                                 </div>
 
-                                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                                    <div className="flex items-start gap-3">
-                                        <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <p className="font-medium text-amber-800 dark:text-amber-200">Important</p>
-                                            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                                                Your appointment will be <strong>pending approval</strong> by the clinic admin.
-                                                You will receive a notification once it's confirmed.
-                                            </p>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-semibold">
+                                        Available Time Slots
+                                    </Label>
+
+                                    {!selectedDate ? (
+                                        <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 text-center">
+                                            Please choose a date to display available doctor hours
                                         </div>
-                                    </div>
+                                    ) : availableSlots.length === 0 ? (
+                                        <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+                                            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600" />
+                                            <span>Doctor has no availability scheduled on this day. Please select another date.</span>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
+                                            {availableSlots.map((slot) => {
+                                                const isSlotSelected = selectedTime === slot;
+
+                                                return (
+                                                    <button
+                                                        key={slot}
+                                                        type="button"
+                                                        onClick={() => handleSlotSelect(slot)}
+                                                        className={cn(
+                                                            'py-2 px-3 rounded-lg text-xs font-bold border transition-all text-center',
+                                                            isSlotSelected
+                                                                ? 'bg-[#0080FF] text-white border-[#0080FF] shadow-xs ring-2 ring-blue-200 dark:ring-blue-900'
+                                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#0080FF] hover:text-[#0080FF]'
+                                                        )}
+                                                    >
+                                                        {slot}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                    {errors.appointment_time && (
+                                        <p className="text-xs text-rose-500">{errors.appointment_time}</p>
+                                    )}
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter className="flex justify-between">
-                            <Button variant="outline" onClick={() => setCurrentStep(2)}>
-                                <ArrowLeft className="h-4 w-4 mr-2" />
-                                Back
-                            </Button>
-                            <Button onClick={handleSubmit} disabled={processing}>
-                                {processing ? 'Booking...' : 'Book Appointment'}
-                            </Button>
-                        </CardFooter>
                     </Card>
                 )}
 
-                {/* Navigation */}
-                <StepNavigation
-                    currentStep={currentStep}
-                    totalSteps={totalSteps}
-                    onNext={() => setCurrentStep(s => s + 1)}
-                    onBack={() => setCurrentStep(s => s - 1)}
-                    canProceed={canProceed()}
-                    nextLabel={currentStep === 3 ? 'Book Appointment' : 'Continue'}
-                />
+                {/* Step 3: Confirm & Patient Notes */}
+                {currentStep === 3 && (
+                    <Card className="border border-slate-200/90 dark:border-slate-800">
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-lg font-bold">Review & Confirmation</CardTitle>
+                            <CardDescription className="text-xs">
+                                Confirm consultation details and add symptoms or visit reason
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="space-y-5">
+                            {/* Summary Card */}
+                            <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0080FF] dark:text-[#38BDF8] mb-3 flex items-center gap-1.5">
+                                    <Sparkles className="h-4 w-4" /> Appointment Summary
+                                </h4>
+                                <div className="grid sm:grid-cols-2 gap-4 text-xs">
+                                    <div>
+                                        <span className="text-slate-400">Doctor:</span>
+                                        <p className="font-bold text-slate-900 dark:text-white text-sm mt-0.5">{selectedDoctor?.name}</p>
+                                        <p className="text-slate-500">{selectedDoctor?.specialty || 'General Practice'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-slate-400">Date & Time:</span>
+                                        <p className="font-bold text-slate-900 dark:text-white text-sm mt-0.5">{selectedDate}</p>
+                                        <p className="text-[#0080FF] font-semibold">{selectedTime}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Patient Notes */}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="patient_notes" className="text-xs font-semibold">
+                                    Symptoms or Reason for Visit (Optional)
+                                </Label>
+                                <Textarea
+                                    id="patient_notes"
+                                    value={data.patient_notes}
+                                    onChange={(e) => setData('patient_notes', e.target.value)}
+                                    placeholder="Describe any symptoms, medical background, or questions for the doctor..."
+                                    rows={4}
+                                    className="focus-visible:ring-[#0080FF] resize-none text-xs"
+                                />
+                            </div>
+
+                            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/80 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
+                                <Info className="h-4.5 w-4.5 shrink-0 mt-0.5 text-amber-600" />
+                                <p>
+                                    Once submitted, your booking request will be placed in <strong>pending</strong> status for the clinic and attending doctor to review.
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Bottom Step Actions */}
+                <div className="flex items-center justify-between pt-4 border-t border-slate-200/80 dark:border-slate-800">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setCurrentStep((s) => Math.max(1, s - 1))}
+                        disabled={currentStep === 1 || processing}
+                        className="gap-1.5 text-xs"
+                    >
+                        <ArrowLeft className="h-4 w-4" /> Back
+                    </Button>
+
+                    {currentStep < totalSteps ? (
+                        <Button
+                            type="button"
+                            onClick={() => setCurrentStep((s) => s + 1)}
+                            disabled={!canProceed()}
+                            className="bg-[#0080FF] hover:bg-[#0070E0] text-white gap-1.5 text-xs font-bold px-5"
+                        >
+                            Continue <ArrowRight className="h-4 w-4" />
+                        </Button>
+                    ) : (
+                        <Button
+                            type="button"
+                            onClick={() => handleSubmit()}
+                            disabled={processing}
+                            className="bg-[#0080FF] hover:bg-[#0070E0] text-white gap-1.5 text-xs font-bold px-6 shadow-sm"
+                        >
+                            {processing ? 'Confirming...' : 'Confirm & Book Appointment'}
+                            <CheckCircle2 className="h-4 w-4" />
+                        </Button>
+                    )}
+                </div>
             </div>
         </>
     );

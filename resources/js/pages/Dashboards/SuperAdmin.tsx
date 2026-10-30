@@ -103,10 +103,12 @@ export default function SuperAdminDashboard() {
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Clinic
-            </Button>
+            <Link href="/admin/clinics">
+              <Button size="sm" className="bg-[#0080FF] hover:bg-[#0070E0] text-white font-bold gap-1.5 shadow-xs">
+                <Building2 className="h-4 w-4" />
+                Manage Clinics
+              </Button>
+            </Link>
           </div>
         </div>
 

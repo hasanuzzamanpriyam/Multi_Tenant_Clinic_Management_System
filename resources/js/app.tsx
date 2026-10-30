@@ -5,10 +5,11 @@ import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import { InertiaProgress } from '@inertiajs/progress';
 import { route } from 'ziggy-js';
+import AuthenticatedLayout from './Layouts/AuthenticatedLayout';
 
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = 'ClinicPro';
 
 // Make route helper globally available
 declare global {
@@ -29,17 +30,34 @@ if (typeof window !== 'undefined') {
 }
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
-    resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
+    title: (title) => (title ? `${title} - ${appName}` : appName),
+    resolve: async (name) => {
+        const page = (await resolvePageComponent(
+            `./pages/${name}.tsx`,
+            import.meta.glob('./pages/**/*.tsx')
+        )) as any;
+
+        if (
+            page.default.layout === undefined &&
+            !name.toLowerCase().startsWith('auth/') &&
+            name.toLowerCase() !== 'welcome'
+        ) {
+            page.default.layout = (pageElement: any) => (
+                <AuthenticatedLayout>{pageElement}</AuthenticatedLayout>
+            );
+        }
+
+        return page;
+    },
     setup({ el, App, props }) {
         createRoot(el).render(<App {...props} />);
     },
     progress: {
-        color: '#4B5563',
+        color: '#0080FF',
     },
 });
 
 InertiaProgress.init({
-    color: '#4B5563',
+    color: '#0080FF',
     showSpinner: true,
 });

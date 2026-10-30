@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Head } from '@inertiajs/react';
-import { Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ClinicProLogo } from '@/components/ClinicProLogo';
+import { ArrowRight, Lock, Mail } from 'lucide-react';
 
 export default function Login() {
     const { data, setData, post, processing, errors } = useForm({
@@ -22,72 +22,85 @@ export default function Login() {
 
     return (
         <>
-            <Head title="Log in" />
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-md w-full space-y-8">
-                    <div>
-                        <h1 className="text-center text-3xl font-bold text-gray-900 dark:text-white">
-                            Sign in to your account
-                        </h1>
-                        <p className="mt-2 text-center text-gray-600 dark:text-gray-400">
-                            Or{' '}
-                            <Link href={route('register')} className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
-                                create a new account
-                            </Link>
-                        </p>
-                    </div>
+            <Head title="Sign In — ClinicPro" />
 
-                    <Card>
-                        <CardHeader className="space-y-1">
-                            <CardTitle className="text-center">Log in</CardTitle>
-                            <CardDescription className="text-center">
-                                Enter your email and password to access your account
+            <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative selection:bg-[#0080FF] selection:text-white">
+                <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-4">
+                    <Link href="/" className="inline-block">
+                        <ClinicProLogo size="lg" />
+                    </Link>
+                    <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                        Sign In to ClinicPro
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Multi-tenant clinical management and healthcare portal
+                    </p>
+                </div>
+
+                <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
+                    <Card className="border border-slate-200/90 dark:border-slate-800 shadow-lg">
+                        <CardHeader className="space-y-1 pb-4">
+                            <CardTitle className="text-lg font-bold">Welcome back</CardTitle>
+                            <CardDescription className="text-xs">
+                                Enter your credentials to access your clinic portal
                             </CardDescription>
                         </CardHeader>
 
                         <CardContent>
-                            <form onSubmit={submit} className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        required
-                                        value={data.email}
-                                        onChange={(e) => setData('email', e.target.value)}
-                                        className={errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}
-                                        disabled={processing}
-                                    />
+                            <form onSubmit={submit} className="space-y-4.5">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="email" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        Email Address
+                                    </Label>
+                                    <div className="relative">
+                                        <Mail className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                        <Input
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            autoComplete="email"
+                                            required
+                                            value={data.email}
+                                            onChange={(e) => setData('email', e.target.value)}
+                                            className={`pl-9 ${errors.email ? 'border-rose-500 focus-visible:ring-rose-500' : 'focus-visible:ring-[#0080FF]'}`}
+                                            disabled={processing}
+                                            placeholder="doctor@clinic.com"
+                                        />
+                                    </div>
                                     {errors.email && (
-                                        <p className="text-sm text-red-500 dark:text-red-400">{errors.email}</p>
+                                        <p className="text-xs text-rose-500 dark:text-rose-400">{errors.email}</p>
                                     )}
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                     <div className="flex items-center justify-between">
-                                        <Label htmlFor="password">Password</Label>
+                                        <Label htmlFor="password" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                            Password
+                                        </Label>
                                         <Link
                                             href={route('password.request')}
-                                            className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                                            className="text-xs font-medium text-[#0080FF] hover:text-[#0070E0] dark:text-[#38BDF8]"
                                         >
                                             Forgot password?
                                         </Link>
                                     </div>
-                                    <Input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        autoComplete="current-password"
-                                        required
-                                        value={data.password}
-                                        onChange={(e) => setData('password', e.target.value)}
-                                        className={errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}
-                                        disabled={processing}
-                                    />
+                                    <div className="relative">
+                                        <Lock className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                        <Input
+                                            id="password"
+                                            name="password"
+                                            type="password"
+                                            autoComplete="current-password"
+                                            required
+                                            value={data.password}
+                                            onChange={(e) => setData('password', e.target.value)}
+                                            className={`pl-9 ${errors.password ? 'border-rose-500 focus-visible:ring-rose-500' : 'focus-visible:ring-[#0080FF]'}`}
+                                            disabled={processing}
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
                                     {errors.password && (
-                                        <p className="text-sm text-red-500 dark:text-red-400">{errors.password}</p>
+                                        <p className="text-xs text-rose-500 dark:text-rose-400">{errors.password}</p>
                                     )}
                                 </div>
 
@@ -96,29 +109,37 @@ export default function Login() {
                                         id="remember"
                                         name="remember"
                                         type="checkbox"
-                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                                         checked={data.remember}
                                         onChange={(e) => setData('remember', e.target.checked)}
+                                        className="h-4 w-4 text-[#0080FF] focus:ring-[#0080FF] border-slate-300 rounded"
                                     />
-                                    <Label htmlFor="remember" className="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                                        Remember me
+                                    <Label htmlFor="remember" className="ml-2 block text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
+                                        Remember my session
                                     </Label>
                                 </div>
 
-                                <Button type="submit" className="w-full" disabled={processing}>
-                                    {processing ? 'Signing in...' : 'Sign in'}
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-[#0080FF] hover:bg-[#0070E0] text-white font-bold h-10.5 rounded-xl text-sm shadow-sm"
+                                    disabled={processing}
+                                >
+                                    {processing ? 'Signing In...' : 'Sign In'}
+                                    <ArrowRight className="h-4 w-4 ml-1.5" />
                                 </Button>
                             </form>
-                        </CardContent>
 
-                        <CardFooter className="flex justify-center">
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Don't have an account?{' '}
-                                <Link href={route('register')} className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
-                                    Sign up
-                                </Link>
-                            </p>
-                        </CardFooter>
+                            <div className="mt-5 text-center pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    New patient?{' '}
+                                    <Link
+                                        href={route('register')}
+                                        className="font-bold text-[#0080FF] hover:text-[#0070E0] dark:text-[#38BDF8]"
+                                    >
+                                        Create an account
+                                    </Link>
+                                </p>
+                            </div>
+                        </CardContent>
                     </Card>
                 </div>
             </div>
