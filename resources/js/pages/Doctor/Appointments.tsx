@@ -491,7 +491,7 @@ export default function DoctorAppointments({ appointments, filters }: { appointm
                                 <Button variant="outline" onClick={() => { setShowNotesModal(false); setSelectedAppointment(null); }} disabled={processing}>
                                     Cancel
                                 </Button>
-                                <Button variant="destructive" onClick={() => handleCompleteAction} disabled={processing}>
+                                <Button variant="destructive" onClick={handleCompleteAction} disabled={processing}>
                                     {processing ? 'Completing...' : 'Complete Appointment'}
                                 </Button>
                             </div>

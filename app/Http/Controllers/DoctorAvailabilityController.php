@@ -20,7 +20,7 @@ class DoctorAvailabilityController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        return Inertia::render('doctor/availabilities/index', [
+        return Inertia::render('Doctor/Availability', [
             'availabilities' => $availabilities,
         ]);
     }

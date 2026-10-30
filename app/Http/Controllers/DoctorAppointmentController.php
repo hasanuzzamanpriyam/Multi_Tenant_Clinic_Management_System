@@ -16,7 +16,7 @@ class DoctorAppointmentController extends Controller
     {
         $user = $request->user();
 
-        $appointments = Appointment::with(['patient'])
+        $appointments = Appointment::with(['patient', 'prescriptions'])
             ->where('doctor_id', $user->id)
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->date, fn($q) => $q->whereDate('appointment_date', $request->date))
@@ -24,7 +24,7 @@ class DoctorAppointmentController extends Controller
             ->latest('appointment_time')
             ->paginate(15);
 
-        return Inertia::render('doctor/appointments/index', [
+        return Inertia::render('Doctor/Appointments', [
             'appointments' => $appointments,
             'filters' => $request->only(['status', 'date']),
         ]);
@@ -36,9 +36,9 @@ class DoctorAppointmentController extends Controller
     public function show(Request $request, Appointment $appointment)
     {
         $this->authorizeDoctor($appointment);
-        $appointment->load(['patient', 'doctor', 'prescriptions']);
+        $appointment->load(['patient', 'doctor', 'clinic', 'prescriptions']);
 
-        return Inertia::render('doctor/appointments/show', [
+        return Inertia::render('Doctor/AppointmentShow', [
             'appointment' => $appointment,
         ]);
     }

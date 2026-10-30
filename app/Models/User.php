@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -47,6 +48,30 @@ class User extends Authenticatable
     public function tenant(): BelongsTo
     {
         return $this->clinic();
+    }
+
+    /**
+     * Get the appointments where the user is the patient.
+     */
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class, 'patient_id');
+    }
+
+    /**
+     * Get the appointments where the user is the doctor.
+     */
+    public function doctorAppointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class, 'doctor_id');
+    }
+
+    /**
+     * Get the doctor's availability schedule.
+     */
+    public function availabilities(): HasMany
+    {
+        return $this->hasMany(DoctorAvailability::class, 'doctor_id');
     }
 
     /**

@@ -21,7 +21,7 @@ class ClinicAdminApprovalController extends Controller
             ->latest()
             ->paginate(15);
 
-        return Inertia::render('clinic-admin/approvals/index', [
+        return Inertia::render('ClinicAdmin/Approvals/Index', [
             'pendingDoctors' => $pendingDoctors,
         ]);
     }

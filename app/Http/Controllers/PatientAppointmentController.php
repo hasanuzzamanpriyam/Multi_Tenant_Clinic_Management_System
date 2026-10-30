@@ -16,14 +16,14 @@ class PatientAppointmentController extends Controller
     {
         $user = $request->user();
 
-        $appointments = Appointment::with(['doctor'])
+        $appointments = Appointment::with(['doctor', 'prescriptions'])
             ->where('patient_id', $user->id)
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->latest('appointment_date')
             ->latest('appointment_time')
             ->paginate(15);
 
-        return Inertia::render('patient/appointments/index', [
+        return Inertia::render('Patient/Appointments', [
             'appointments' => $appointments,
             'filters' => $request->only(['status']),
         ]);
@@ -107,9 +107,9 @@ class PatientAppointmentController extends Controller
     public function show(Request $request, Appointment $appointment)
     {
         $this->authorizePatient($appointment);
-        $appointment->load(['doctor', 'patient']);
+        $appointment->load(['doctor', 'patient', 'clinic', 'prescriptions']);
 
-        return Inertia::render('patient/appointments/show', [
+        return Inertia::render('Patient/AppointmentShow', [
             'appointment' => $appointment,
         ]);
     }

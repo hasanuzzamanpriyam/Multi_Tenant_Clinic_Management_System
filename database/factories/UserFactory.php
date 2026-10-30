@@ -45,4 +45,69 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Create a super admin user with no tenant.
+     */
+    public function superAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'super_admin',
+            'tenant_id' => null,
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * Create a clinic admin user.
+     */
+    public function clinicAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'clinic_admin',
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * Create a doctor user.
+     */
+    public function doctor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'doctor',
+            'specialty' => fake()->randomElement([
+                'General Practice',
+                'Cardiology',
+                'Dermatology',
+                'Neurology',
+                'Orthopedics',
+                'Pediatrics',
+                'Psychiatry',
+                'Ophthalmology',
+            ]),
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * Create a patient user.
+     */
+    public function patient(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'patient',
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * Create an inactive user (pending approval).
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
+    }
 }

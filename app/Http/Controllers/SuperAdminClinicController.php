@@ -17,7 +17,7 @@ class SuperAdminClinicController extends Controller
             ->latest()
             ->paginate(15);
 
-        return Inertia::render('super-admin/clinics/index', [
+        return Inertia::render('SuperAdmin/Clinics/Index', [
             'clinics' => $clinics,
         ]);
     }
@@ -27,7 +27,7 @@ class SuperAdminClinicController extends Controller
      */
     public function create(Request $request)
     {
-        return Inertia::render('super-admin/clinics/create');
+        return Inertia::render('SuperAdmin/Clinics/Form');
     }
 
     /**
@@ -65,7 +65,7 @@ class SuperAdminClinicController extends Controller
      */
     public function edit(Request $request, Clinic $clinic)
     {
-        return Inertia::render('super-admin/clinics/edit', [
+        return Inertia::render('SuperAdmin/Clinics/Form', [
             'clinic' => $clinic,
         ]);
     }
