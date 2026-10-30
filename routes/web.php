@@ -48,7 +48,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
 
     // Two-factor authentication
-    Route::get('/two-factor-authentication', fn () => Inertia::render('two-factor'))->name('two-factor');
+    Route::get('/two-factor-authentication', function () {
+        $user = auth()->user();
+        return Inertia::render('two-factor', [
+            'twoFactorEnabled' => !is_null($user->two_factor_secret) && !is_null($user->two_factor_confirmed_at),
+            'twoFactorPending' => !is_null($user->two_factor_secret) && is_null($user->two_factor_confirmed_at),
+        ]);
+    })->name('two-factor');
 
     // Session management
     Route::get('/user/sessions', fn () => Inertia::render('sessions'))->name('sessions');

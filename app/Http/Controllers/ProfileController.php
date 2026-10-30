@@ -12,11 +12,15 @@ class ProfileController extends Controller
      */
     public function edit(Request $request)
     {
-        $user = $request->user()->load('tenant');
+        $user = $request->user();
+
+        if ($user->tenant_id) {
+            $user->load('tenant');
+        }
 
         return Inertia::render('Profile/Edit', [
             'user' => $user,
-            'canManageTwoFactor' => config('fortify.features')['two_factor_authentication'] ?? false,
+            'canManageTwoFactor' => true,
         ]);
     }
 }

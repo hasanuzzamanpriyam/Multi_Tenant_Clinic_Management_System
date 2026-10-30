@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import { ClinicProLogo } from '@/components/ClinicProLogo';
 import {
@@ -337,25 +337,17 @@ export default function AuthenticatedLayout({ children }: AuthenticatedLayoutPro
                       </div>
 
                       <div className="py-1">
-                        <form action="/logout" method="POST">
-                          <input
-                            type="hidden"
-                            name="_token"
-                            value={
-                              typeof document !== 'undefined'
-                                ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                                : ''
-                            }
-                          />
-                          <button
-                            type="submit"
-                            className="flex w-full items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50/60 dark:hover:bg-rose-950/20"
-                            onClick={() => setUserMenuOpen(false)}
-                          >
-                            <LogOut className="h-4 w-4" />
-                            Sign Out
-                          </button>
-                        </form>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            router.post(route('logout'));
+                          }}
+                          className="flex w-full items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50/60 dark:hover:bg-rose-950/20 cursor-pointer transition-colors"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sign Out
+                        </button>
                       </div>
                     </div>
                   </>
