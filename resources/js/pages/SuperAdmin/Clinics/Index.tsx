@@ -1,7 +1,6 @@
 'use client';
 
-import { Head } from '@inertiajs/react';
-import { Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,30 +31,46 @@ interface Clinic {
     created_at: string;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
 interface Clinics {
     data: Clinic[];
     current_page: number;
     last_page: number;
     per_page: number;
     total: number;
+    links?: PaginationLink[];
 }
 
-export default function ClinicsIndex({ clinics, filters }: { clinics: Clinics; filters: { search: string } }) {
-    const [search, setSearch] = useState(filters.search || '');
+export default function ClinicsIndex({ clinics, filters }: { clinics: Clinics; filters?: { search?: string } }) {
+    const [search, setSearch] = useState(filters?.search || '');
+    const [searching, setSearching] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
-
-    const { get, processing, delete: destroy } = useForm({});
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        get(route('admin.clinics.index'), { search }, { preserveScroll: true });
+        setSearching(true);
+        router.get(
+            route('admin.clinics.index'),
+            { search },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                onFinish: () => setSearching(false),
+            }
+        );
     };
 
     const handleDelete = (clinicId: number) => {
         if (confirm('Are you sure you want to delete this clinic? This action cannot be undone.')) {
             setDeletingId(clinicId);
-            destroy(route('admin.clinics.destroy', clinicId), {
-                onSuccess: () => setDeletingId(null),
+            router.delete(route('admin.clinics.destroy', clinicId), {
+                preserveScroll: true,
+                onFinish: () => setDeletingId(null),
             });
         }
     };
@@ -100,8 +115,12 @@ export default function ClinicsIndex({ clinics, filters }: { clinics: Clinics; f
                                     className="pl-10"
                                 />
                             </div>
-                            <Button type="submit" disabled={processing}>
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            <Button type="submit" disabled={searching} className="bg-[#0080FF] hover:bg-[#0066CC] text-white">
+                                {searching ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                ) : (
+                                    <Search className="h-4 w-4 mr-2" />
+                                )}
                                 Search
                             </Button>
                             <Link href={route('admin.clinics.index')}>
@@ -220,7 +239,7 @@ export default function ClinicsIndex({ clinics, filters }: { clinics: Clinics; f
                                                 size="sm"
                                                 className="h-8 w-8 p-0 text-red-600 hover:text-red-700 dark:text-red-400"
                                                 onClick={() => handleDelete(clinic.id)}
-                                                disabled={processing}
+                                                disabled={deletingId !== null}
                                             >
                                                 {deletingId === clinic.id ? (
                                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -239,7 +258,32 @@ export default function ClinicsIndex({ clinics, filters }: { clinics: Clinics; f
                     </CardContent>
                 </Card>
 
-                {/* Pagination handled by Inertia */}
+                {/* Pagination */}
+                {clinics.links && clinics.links.length > 3 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800 pt-4">
+                        <div className="text-xs text-slate-500">
+                            Showing {(clinics.current_page - 1) * clinics.per_page + 1} to{' '}
+                            {Math.min(clinics.current_page * clinics.per_page, clinics.total)} of {clinics.total} clinics
+                        </div>
+                        <div className="flex items-center gap-1 flex-wrap">
+                            {clinics.links.map((link, idx) => (
+                                <Link
+                                    key={idx}
+                                    href={link.url || '#'}
+                                    preserveScroll
+                                    className={cn(
+                                        'px-3 py-1.5 text-xs rounded-lg transition-colors font-medium',
+                                        !link.url && 'opacity-40 pointer-events-none text-slate-400',
+                                        link.active
+                                            ? 'bg-[#0080FF] text-white shadow-xs'
+                                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                    )}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

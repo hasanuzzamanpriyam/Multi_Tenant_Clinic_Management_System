@@ -4,9 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
@@ -21,15 +20,23 @@ class RoleMiddleware
         $user = Auth::user();
 
         if (! $user) {
-            return response()->json(['message' => 'Unauthenticated.'], SymfonyResponse::HTTP_UNAUTHORIZED);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], Response::HTTP_UNAUTHORIZED);
+            }
+
+            return redirect()->guest(route('login'));
         }
 
         // Normalize roles to array
-        $allowedRoles = is_array($roles[0]) ? $roles[0] : $roles;
+        $allowedRoles = (! empty($roles) && is_array($roles[0])) ? $roles[0] : $roles;
 
         // Check if user has one of the allowed roles
         if (! in_array($user->role, $allowedRoles, true)) {
-            return response()->json(['message' => 'Forbidden.'], SymfonyResponse::HTTP_FORBIDDEN);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Forbidden.'], Response::HTTP_FORBIDDEN);
+            }
+
+            abort(403, 'Unauthorized access.');
         }
 
         return $next($request);

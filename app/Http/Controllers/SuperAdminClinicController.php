@@ -13,12 +13,25 @@ class SuperAdminClinicController extends Controller
      */
     public function index(Request $request)
     {
+        $search = $request->input('search');
+
         $clinics = Clinic::withCount(['users', 'appointments'])
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                });
+            })
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return Inertia::render('SuperAdmin/Clinics/Index', [
             'clinics' => $clinics,
+            'filters' => [
+                'search' => $search ?? '',
+            ],
         ]);
     }
 
@@ -53,9 +66,13 @@ class SuperAdminClinicController extends Controller
      */
     public function show(Request $request, Clinic $clinic)
     {
-        $clinic->load(['users', 'appointments' => fn($q) => $q->latest()->limit(10)]);
+        $clinic->load([
+            'users' => fn ($q) => $q->latest()->limit(25),
+            'appointments' => fn ($q) => $q->with(['patient', 'doctor'])->latest()->limit(25),
+        ]);
+        $clinic->loadCount(['users', 'appointments']);
 
-        return Inertia::render('super-admin/clinics/show', [
+        return Inertia::render('SuperAdmin/Clinics/Show', [
             'clinic' => $clinic,
         ]);
     }

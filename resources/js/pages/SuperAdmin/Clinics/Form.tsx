@@ -82,7 +82,7 @@ export default function ClinicForm({ clinic }: ClinicFormProps) {
                     </CardHeader>
 
                     <CardContent>
-                        <form onSubmit={submit} className="space-y-6">
+                        <form id="clinic-form" onSubmit={submit} className="space-y-6">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Clinic Name <span className="text-red-500">*</span></Label>
                                 <Input
@@ -155,17 +155,24 @@ export default function ClinicForm({ clinic }: ClinicFormProps) {
                                     <p className="text-sm text-red-500 dark:text-red-400">{errors.address}</p>
                                 )}
                             </div>
+
+                            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <Link href={route('admin.clinics.index')}>
+                                    <Button type="button" variant="outline" className="cursor-pointer">
+                                        Cancel
+                                    </Button>
+                                </Link>
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="bg-[#0080FF] hover:bg-[#0066CC] text-white font-medium cursor-pointer"
+                                >
+                                    {processing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                    {processing ? 'Saving...' : (isEditing ? 'Update Clinic' : 'Create Clinic')}
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
-
-                    <CardFooter className="flex justify-end gap-3">
-                        <Link href={route('admin.clinics.index')}>
-                            <Button variant="outline">Cancel</Button>
-                        </Link>
-                        <Button type="submit" form="clinic-form" disabled={processing}>
-                            {processing ? 'Saving...' : (isEditing ? 'Update Clinic' : 'Create Clinic')}
-                        </Button>
-                    </CardFooter>
                 </Card>
             </div>
         </>
