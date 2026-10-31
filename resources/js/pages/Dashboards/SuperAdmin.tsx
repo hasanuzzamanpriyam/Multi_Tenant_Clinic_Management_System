@@ -56,14 +56,14 @@ export default function SuperAdminDashboard() {
       description: 'Register a new clinic in the system',
       icon: Plus,
       href: '/admin/clinics/create',
-      color: 'bg-blue-500 hover:bg-blue-600',
+      color: 'bg-[#0080FF] hover:bg-[#0066CC]',
     },
     {
       name: 'Manage Users',
       description: 'View and manage all system users',
       icon: Users,
       href: '/admin/users',
-      color: 'bg-green-500 hover:bg-green-600',
+      color: 'bg-emerald-500 hover:bg-emerald-600',
     },
     {
       name: 'Review Approvals',
@@ -74,10 +74,10 @@ export default function SuperAdminDashboard() {
     },
     {
       name: 'System Settings',
-      description: 'Configure system-wide settings',
+      description: 'Configure security & system profile',
       icon: Settings,
-      href: '/settings',
-      color: 'bg-gray-500 hover:bg-gray-600',
+      href: '/profile',
+      color: 'bg-slate-600 hover:bg-slate-700',
     },
   ];
 
@@ -99,12 +99,14 @@ export default function SuperAdminDashboard() {
             <p className="text-gray-500 dark:text-gray-400 mt-1">System-wide overview and management</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
+            <Link href="/profile">
+              <Button variant="outline" size="sm" className="cursor-pointer">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
             <Link href="/admin/clinics">
-              <Button size="sm" className="bg-[#0080FF] hover:bg-[#0070E0] text-white font-bold gap-1.5 shadow-xs">
+              <Button size="sm" className="bg-[#0080FF] hover:bg-[#0070E0] text-white font-bold gap-1.5 shadow-xs cursor-pointer">
                 <Building2 className="h-4 w-4" />
                 Manage Clinics
               </Button>
@@ -141,8 +143,8 @@ export default function SuperAdminDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 Quick Actions
-                <Link href="/admin/clinics/create" className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">
-                  View all <ArrowRight className="h-3 w-3 ml-1" />
+                <Link href="/admin/clinics" className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">
+                  Manage <ArrowRight className="h-3 w-3 ml-1 inline" />
                 </Link>
               </CardTitle>
             </CardHeader>
@@ -172,8 +174,8 @@ export default function SuperAdminDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 Recent Activity
-                <Link href="/admin/activity" className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">
-                  View all <ArrowRight className="h-3 w-3 ml-1" />
+                <Link href="/admin/clinics" className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">
+                  View Clinics <ArrowRight className="h-3 w-3 ml-1 inline" />
                 </Link>
               </CardTitle>
             </CardHeader>

@@ -17,10 +17,15 @@ class SuperAdminApprovalController extends Controller
             ->where('status', 'pending')
             ->when($request->tenant_id, fn($q) => $q->where('tenant_id', $request->tenant_id))
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return Inertia::render('super-admin/approvals/index', [
+        return Inertia::render('SuperAdmin/Approvals/Index', [
             'appointments' => $appointments,
+            'filters' => [
+                'tenant_id' => $request->tenant_id ?? '',
+            ],
+            'clinics' => \App\Models\Clinic::select(['id', 'name'])->get(),
         ]);
     }
 
@@ -42,15 +47,15 @@ class SuperAdminApprovalController extends Controller
     public function reject(Request $request, Appointment $appointment)
     {
         $request->validate([
-            'rejection_reason' => 'required|string',
+            'rejection_reason' => 'nullable|string|max:500',
         ]);
 
         $appointment->update([
             'status' => 'cancelled',
-            'doctor_notes' => $request->rejection_reason,
             'cancelled_at' => now(),
+            'doctor_notes' => $request->rejection_reason ?: 'Cancelled by administrator.',
         ]);
 
-        return back()->with('success', 'Appointment rejected successfully.');
+        return back()->with('success', 'Appointment rejected.');
     }
 }

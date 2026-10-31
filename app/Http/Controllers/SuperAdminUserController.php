@@ -18,11 +18,16 @@ class SuperAdminUserController extends Controller
                 ->orWhere('email', 'like', "%{$request->search}%"))
             ->when($request->role, fn($q) => $q->where('role', $request->role))
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return Inertia::render('super-admin/users/index', [
+        return Inertia::render('SuperAdmin/Users/Index', [
             'users' => $users,
-            'filters' => $request->only(['search', 'role']),
+            'filters' => [
+                'search' => $request->search ?? '',
+                'role' => $request->role ?? '',
+            ],
+            'clinics' => \App\Models\Clinic::all(['id', 'name']),
         ]);
     }
 
@@ -33,7 +38,7 @@ class SuperAdminUserController extends Controller
     {
         $clinics = \App\Models\Clinic::all(['id', 'name']);
 
-        return Inertia::render('super-admin/users/create', [
+        return Inertia::render('SuperAdmin/Users/Form', [
             'clinics' => $clinics,
         ]);
     }
@@ -68,7 +73,7 @@ class SuperAdminUserController extends Controller
     {
         $user->load('clinic');
 
-        return Inertia::render('super-admin/users/show', [
+        return Inertia::render('SuperAdmin/Users/Show', [
             'user' => $user,
         ]);
     }
@@ -80,7 +85,7 @@ class SuperAdminUserController extends Controller
     {
         $clinics = \App\Models\Clinic::all(['id', 'name']);
 
-        return Inertia::render('super-admin/users/edit', [
+        return Inertia::render('SuperAdmin/Users/Form', [
             'user' => $user,
             'clinics' => $clinics,
         ]);

@@ -59,6 +59,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Session management
     Route::get('/user/sessions', fn () => Inertia::render('sessions'))->name('sessions');
 
+    // Settings shortcut
+    Route::get('/settings', fn () => redirect()->route('profile'))->name('settings');
+
     // Logout
     Route::post('/logout', function () {
         auth()->logout();
