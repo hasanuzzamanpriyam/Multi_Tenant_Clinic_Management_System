@@ -26,6 +26,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Building,
+  Activity,
 } from 'lucide-react';
 
 interface AuthenticatedLayoutProps {
@@ -38,6 +39,7 @@ const navigation = {
     { name: 'Clinics', href: '/admin/clinics', icon: Building2 },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Approvals', href: '/admin/approvals', icon: ClipboardCheck },
+    { name: 'Activity Log', href: '/admin/activity', icon: Activity },
   ],
   clinic_admin: [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },

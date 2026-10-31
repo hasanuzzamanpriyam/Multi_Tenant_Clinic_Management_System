@@ -8,6 +8,7 @@ use App\Http\Controllers\DoctorAppointmentController;
 use App\Http\Controllers\DoctorAvailabilityController;
 use App\Http\Controllers\PatientAppointmentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SuperAdminActivityController;
 use App\Http\Controllers\SuperAdminApprovalController;
 use App\Http\Controllers\SuperAdminClinicController;
 use App\Http\Controllers\SuperAdminUserController;
@@ -88,6 +89,9 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->prefix('admin')->na
     Route::get('approvals', [SuperAdminApprovalController::class, 'index'])->name('approvals.index');
     Route::post('approvals/{appointment}/approve', [SuperAdminApprovalController::class, 'approve'])->name('approvals.approve');
     Route::post('approvals/{appointment}/reject', [SuperAdminApprovalController::class, 'reject'])->name('approvals.reject');
+
+    // System Activity Log
+    Route::get('activity', [SuperAdminActivityController::class, 'index'])->name('activity.index');
 });
 
 /*
