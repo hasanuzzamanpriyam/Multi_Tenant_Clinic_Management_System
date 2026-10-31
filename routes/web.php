@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClinicAdminAppointmentController;
 use App\Http\Controllers\ClinicAdminApprovalController;
 use App\Http\Controllers\ClinicDoctorController;
 use App\Http\Controllers\ClinicPatientController;
@@ -107,9 +108,15 @@ Route::middleware(['auth', 'verified', 'role:clinic_admin'])->prefix('clinic-adm
 
     // Doctors
     Route::resource('doctors', ClinicDoctorController::class);
+    Route::post('doctors/{doctor}/availability', [ClinicDoctorController::class, 'storeAvailability'])->name('doctors.availability.store');
+    Route::put('doctors/{doctor}/availability/{availability}', [ClinicDoctorController::class, 'updateAvailability'])->name('doctors.availability.update');
+    Route::delete('doctors/{doctor}/availability/{availability}', [ClinicDoctorController::class, 'destroyAvailability'])->name('doctors.availability.destroy');
 
     // Patients
     Route::resource('patients', ClinicPatientController::class);
+
+    // Appointments
+    Route::get('appointments', [ClinicAdminAppointmentController::class, 'index'])->name('appointments.index');
 });
 
 /*

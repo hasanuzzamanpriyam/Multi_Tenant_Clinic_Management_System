@@ -46,6 +46,7 @@ const navigation = {
     { name: 'Doctor Approvals', href: '/clinic-admin/approvals', icon: ClipboardCheck },
     { name: 'Doctors', href: '/clinic-admin/doctors', icon: Stethoscope },
     { name: 'Patients', href: '/clinic-admin/patients', icon: Users },
+    { name: 'Appointments', href: '/clinic-admin/appointments', icon: CalendarDays },
   ],
   doctor: [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
