@@ -27,6 +27,14 @@ import {
   AlertCircle,
   Building,
   Activity,
+  Clock,
+  CreditCard,
+  Pill,
+  Star,
+  BarChart3,
+  Share2,
+  Receipt,
+  Wallet,
 } from 'lucide-react';
 
 interface AuthenticatedLayoutProps {
@@ -39,6 +47,8 @@ const navigation = {
     { name: 'Clinics', href: '/admin/clinics', icon: Building2 },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Approvals', href: '/admin/approvals', icon: ClipboardCheck },
+    { name: 'Calendar', href: '/calendar', icon: Calendar },
+    { name: 'Reports', href: '/reports', icon: BarChart3 },
     { name: 'Activity Log', href: '/admin/activity', icon: Activity },
   ],
   clinic_admin: [
@@ -47,16 +57,29 @@ const navigation = {
     { name: 'Doctors', href: '/clinic-admin/doctors', icon: Stethoscope },
     { name: 'Patients', href: '/clinic-admin/patients', icon: Users },
     { name: 'Appointments', href: '/clinic-admin/appointments', icon: CalendarDays },
+    { name: 'Calendar', href: '/calendar', icon: Calendar },
+    { name: 'Billing & Invoices', href: '/billing', icon: CreditCard },
+    { name: 'Pharmacy & Stock', href: '/inventory/medicines', icon: Pill },
+    { name: 'Reports', href: '/reports', icon: BarChart3 },
   ],
   doctor: [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'My Appointments', href: '/doctor/appointments', icon: CalendarDays },
-    { name: 'Manage Availability', href: '/doctor/availability', icon: Calendar },
+    { name: 'Calendar', href: '/calendar', icon: Calendar },
+    { name: 'Manage Availability', href: '/doctor/availability', icon: Clock },
+    { name: 'Clinical Records', href: '/clinical/medical-histories', icon: FileText },
+    { name: 'Referrals', href: '/clinical/referrals', icon: Share2 },
+    { name: 'Reviews', href: '/doctor-reviews', icon: Star },
+    { name: 'My Earnings', href: '/billing/doctor-earnings', icon: Wallet },
   ],
   patient: [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'My Appointments', href: '/patient/appointments', icon: CalendarDays },
     { name: 'Book Appointment', href: '/patient/appointments/create', icon: Plus },
+    { name: 'My Appointments', href: '/patient/appointments', icon: CalendarDays },
+    { name: 'Calendar', href: '/calendar', icon: Calendar },
+    { name: 'Medical Records & Reports', href: '/patient/records', icon: FileText },
+    { name: 'Invoices & Billing', href: '/billing/invoices', icon: Receipt },
+    { name: 'Doctor Reviews', href: '/doctor-reviews', icon: Star },
   ],
 };
 

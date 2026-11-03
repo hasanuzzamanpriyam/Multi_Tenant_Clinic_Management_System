@@ -5,10 +5,12 @@ namespace App\Models;
 use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Invoice;
+use App\Models\Payment;
 
 class Appointment extends Model
 {
-    use HasFactory, BelongsToTenant;
+    use BelongsToTenant, HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -22,10 +24,13 @@ class Appointment extends Model
         'appointment_date',
         'appointment_time',
         'status',
+        'priority',
         'patient_notes',
         'doctor_notes',
         'completed_at',
         'cancelled_at',
+        'meeting_url',
+        'meeting_token',
     ];
 
     /**
@@ -73,5 +78,53 @@ class Appointment extends Model
     public function prescriptions()
     {
         return $this->hasMany(Prescription::class);
+    }
+
+    /**
+     * Get the lab results associated with the appointment.
+     */
+    public function labResults()
+    {
+        return $this->hasMany(LabResult::class);
+    }
+
+    /**
+     * Get the document uploads associated with the appointment.
+     */
+    public function documentUploads()
+    {
+        return $this->hasMany(DocumentUpload::class);
+    }
+
+    /**
+     * Get the doctor review associated with the appointment.
+     */
+    public function doctorReview()
+    {
+        return $this->hasOne(DoctorReview::class);
+    }
+
+    /**
+     * Get the doctor referral associated with the appointment.
+     */
+    public function doctorReferral()
+    {
+        return $this->hasOne(DoctorReferral::class);
+    }
+
+    /**
+     * Get the invoice associated with the appointment.
+     */
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
+    /**
+     * Get the payments associated with the appointment.
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

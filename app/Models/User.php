@@ -9,13 +9,20 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use App\Models\Payment;
+use App\Models\InsuranceClaim;
+use App\Models\PaymentMethod;
 
 #[Fillable([
     'name',
     'email',
+    'locale',
     'password',
     'tenant_id',
     'role',
@@ -52,6 +59,78 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the notification preferences for the user.
+     */
+    public function notificationPreference(): HasOne
+    {
+        return $this->hasOne(NotificationPreference::class);
+    }
+
+    /**
+     * Get the medical histories where the user is the patient.
+     */
+    public function medicalHistories(): HasMany
+    {
+        return $this->hasMany(MedicalHistory::class, 'patient_id');
+    }
+
+    /**
+     * Get the lab results where the user is the patient.
+     */
+    public function labResults(): HasMany
+    {
+        return $this->hasMany(LabResult::class, 'patient_id');
+    }
+
+    /**
+     * Get the document uploads where the user is the patient.
+     */
+    public function documentUploads(): HasMany
+    {
+        return $this->hasMany(DocumentUpload::class, 'patient_id');
+    }
+
+    /**
+     * Get the immunization records where the user is the patient.
+     */
+    public function immunizationRecords(): HasMany
+    {
+        return $this->hasMany(ImmunizationRecord::class, 'patient_id');
+    }
+
+    /**
+     * Get the doctor reviews where the user is the patient.
+     */
+    public function doctorReviews(): HasMany
+    {
+        return $this->hasMany(DoctorReview::class, 'patient_id');
+    }
+
+    /**
+     * Get the doctor reviews where the user is the doctor.
+     */
+    public function receivedReviews(): HasMany
+    {
+        return $this->hasMany(DoctorReview::class, 'doctor_id');
+    }
+
+    /**
+     * Get the referrals from this doctor.
+     */
+    public function referralsFrom(): HasMany
+    {
+        return $this->hasMany(DoctorReferral::class, 'from_doctor_id');
+    }
+
+    /**
+     * Get the referrals to this doctor.
+     */
+    public function referralsTo(): HasMany
+    {
+        return $this->hasMany(DoctorReferral::class, 'to_doctor_id');
+    }
+
+    /**
      * Get the appointments where the user is the patient.
      */
     public function appointments(): HasMany
@@ -73,6 +152,38 @@ class User extends Authenticatable
     public function availabilities(): HasMany
     {
         return $this->hasMany(DoctorAvailability::class, 'doctor_id');
+    }
+
+    /**
+     * Get the invoices where the user is the patient.
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'patient_id');
+    }
+
+    /**
+     * Get the payments where the user is the patient.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'patient_id');
+    }
+
+    /**
+     * Get the insurance claims where the user is the patient.
+     */
+    public function insuranceClaims(): HasMany
+    {
+        return $this->hasMany(InsuranceClaim::class, 'patient_id');
+    }
+
+    /**
+     * Get the payment methods where the user is the patient.
+     */
+    public function paymentMethods(): HasMany
+    {
+        return $this->hasMany(PaymentMethod::class, 'patient_id');
     }
 
     /**

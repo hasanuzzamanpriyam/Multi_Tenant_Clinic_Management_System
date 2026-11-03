@@ -1,5 +1,6 @@
 import './bootstrap';
 import '../css/app.css';
+import i18n from './lib/i18n';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
@@ -27,6 +28,16 @@ if (typeof window !== 'undefined') {
         (route as any).defaults = (window as any).Ziggy.defaults;
         (route as any).routes = (window as any).Ziggy.routes;
     }
+
+    // Apply RTL for Arabic locale
+    const currentLang = i18n.language;
+    if (currentLang === 'ar') {
+        document.documentElement.dir = 'rtl';
+        document.documentElement.lang = 'ar';
+    } else {
+        document.documentElement.dir = 'ltr';
+        document.documentElement.lang = currentLang;
+    }
 }
 
 createInertiaApp({
@@ -50,6 +61,9 @@ createInertiaApp({
         return page;
     },
     setup({ el, App, props }) {
+        if (props.locale) {
+            i18n.changeLanguage(props.locale);
+        }
         createRoot(el).render(<App {...props} />);
     },
     progress: {
